@@ -2,18 +2,39 @@ const API = "http://85.215.229.230:9389";
 
 let isAdmin = false;
 
-// LOGIN
+// 🔥 SAFE FETCH (error handle karega)
+async function safeFetch(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error("Server error: " + res.status);
+    }
+
+    return await res.json();
+  } catch (err) {
+    alert("Error: " + err.message);
+    console.error(err);
+  }
+}
+
+// ================= LOGIN =================
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch(API + "/login", {
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
+  const data = await safeFetch(API + "/login", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ email, password })
   });
 
-  const data = await res.json();
+  if (!data) return;
 
   if (data.status === "success") {
     document.getElementById("auth").style.display = "none";
@@ -21,30 +42,43 @@ async function login() {
 
     isAdmin = data.is_admin;
     document.getElementById("authResult").innerText = "Login Success ✅";
+
+    loadGuilds();
   } else {
     document.getElementById("authResult").innerText = "Login Failed ❌";
   }
 }
 
-// REGISTER
+// ================= REGISTER =================
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch(API + "/register", {
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
+  const data = await safeFetch(API + "/register", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ email, password })
   });
 
-  const data = await res.json();
-  document.getElementById("authResult").innerText = JSON.stringify(data);
+  if (!data) return;
+
+  if (data.status === "registered") {
+    document.getElementById("authResult").innerText = "Registered Successfully ✅";
+  } else {
+    document.getElementById("authResult").innerText = JSON.stringify(data);
+  }
 }
 
-// LOAD GUILDS
+// ================= LOAD GUILDS =================
 async function loadGuilds() {
-  const res = await fetch(API + "/guilds");
-  const data = await res.json();
+  const data = await safeFetch(API + "/guilds");
+
+  if (!data) return;
 
   const container = document.getElementById("guilds");
   container.innerHTML = "";
@@ -57,15 +91,16 @@ async function loadGuilds() {
   });
 }
 
-// ADMIN PANEL
+// ================= ADMIN PANEL =================
 async function loadUsers() {
   if (!isAdmin) {
     alert("Not admin ❌");
     return;
   }
 
-  const res = await fetch(API + "/admin/users");
-  const data = await res.json();
+  const data = await safeFetch(API + "/admin/users");
+
+  if (!data) return;
 
   const container = document.getElementById("users");
   container.innerHTML = "";
