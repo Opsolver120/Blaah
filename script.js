@@ -1,114 +1,70 @@
 const API = "/api";
 
-let isAdmin = false;
-
-// 🔥 SAFE FETCH (error handle karega)
-async function safeFetch(url, options = {}) {
-  try {
-    const res = await fetch(url, options);
-
-    if (!res.ok) {
-      throw new Error("Server error: " + res.status);
-    }
-
-    return await res.json();
-  } catch (err) {
-    alert("Error: " + err.message);
-    console.error(err);
-  }
+// message show function
+function showMessage(msg, isError = false) {
+  const box = document.getElementById("msg");
+  box.innerText = msg;
+  box.style.color = isError ? "red" : "lightgreen";
 }
 
-// ================= LOGIN =================
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  if (!email || !password) {
-    alert("Enter email & password");
-    return;
-  }
-
-  const data = await safeFetch(API + "/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ email, password })
-  });
-
-  if (!data) return;
-
-  if (data.status === "success") {
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-
-    isAdmin = data.is_admin;
-    document.getElementById("authResult").innerText = "Login Success ✅";
-
-    loadGuilds();
-  } else {
-    document.getElementById("authResult").innerText = "Login Failed ❌";
-  }
-}
-
-// ================= REGISTER =================
+// 🔐 Register
 async function register() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.querySelector("#email").value;
+  const password = document.querySelector("#password").value;
 
-  if (!email || !password) {
-    alert("Enter email & password");
-    return;
-  }
-
-  const data = await safeFetch(API + "/register", {
+  const res = await fetch(API + "/register", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ email, password })
   });
 
-  if (!data) return;
+  const data = await res.json();
 
-  if (data.status === "registered") {
-    document.getElementById("authResult").innerText = "Registered Successfully ✅";
+  if (data.error) {
+    showMessage(data.error, true);
   } else {
-    document.getElementById("authResult").innerText = JSON.stringify(data);
+    showMessage("✅ Registered successfully");
   }
 }
 
-// ================= LOAD GUILDS =================
-async function loadGuilds() {
-  const data = await safeFetch(API + "/guilds");
+// 🔑 Login
+async function login() {
+  const email = document.querySelector("#email").value;
+  const password = document.querySelector("#password").value;
 
-  if (!data) return;
+  const res = await fetch(API + "/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, password })
+  });
 
-  const container = document.getElementById("guilds");
+  const data = await res.json();
+
+  if (data.error) {
+    showMessage(data.error, true);
+  } else {
+    showMessage("✅ Login successful");
+
+    // 👉 dashboard load
+    loadServers();
+  }
+}
+
+// 📦 Load servers
+async function loadServers() {
+  const res = await fetch(API + "/guilds");
+  const data = await res.json();
+
+  const container = document.getElementById("servers");
   container.innerHTML = "";
 
   data.guilds.forEach(g => {
     const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<h3>${g.name}</h3><p>ID: ${g.id}</p>`;
-    container.appendChild(div);
-  });
-}
-
-// ================= ADMIN PANEL =================
-async function loadUsers() {
-  if (!isAdmin) {
-    alert("Not admin ❌");
-    return;
-  }
-
-  const data = await safeFetch(API + "/admin/users");
-
-  if (!data) return;
-
-  const container = document.getElementById("users");
-  container.innerHTML = "";
-
-  data.users.forEach(u => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<p>${u[0]} (Admin: ${u[1]})</p>`;
+    div.innerText = g.name;
     container.appendChild(div);
   });
 }
