@@ -1,4 +1,4 @@
-const API = "http://85.215.229.230:9389";
+const API = "/api";
 
 let isAdmin = false;
 
