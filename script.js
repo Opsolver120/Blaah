@@ -12,3 +12,6 @@ async function loadGuilds() {
     container.appendChild(div);
   });
 }
+
+// 🔥 AUTO LOAD
+loadGuilds();
