@@ -1,17 +1,32 @@
-async function loadGuilds() {
-  const res = await fetch("http://85.215.229.230:9389/guilds");
-  const data = await res.json();
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AKXHAT Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-  const container = document.getElementById("guilds");
-  container.innerHTML = "";
+<div id="auth">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+  <p id="authResult"></p>
+</div>
 
-  data.guilds.forEach(g => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<h3>${g.name}</h3><p>ID: ${g.id}</p>`;
-    container.appendChild(div);
-  });
-}
+<div id="dashboard" style="display:none;">
+  <h1>Dashboard</h1>
+  <button onclick="loadGuilds()">Load Servers</button>
+  <button onclick="loadUsers()">Admin Panel</button>
 
-// 🔥 AUTO LOAD
-loadGuilds();
+  <h2>Servers</h2>
+  <div id="guilds"></div>
+
+  <h2>Admin Users</h2>
+  <div id="users"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
