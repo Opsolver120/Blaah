@@ -1,7 +1,8 @@
 export default async function handler(req, res) {
   const target = "http://85.215.229.230:9389";
 
-  const url = target + req.url.replace("/api", "");
+  const path = req.url.replace(/^\/api/, "");
+  const url = target + path;
 
   try {
     const response = await fetch(url, {
@@ -14,7 +15,7 @@ export default async function handler(req, res) {
 
     const data = await response.text();
 
-    res.status(200).send(data);
+    res.status(response.status).send(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
